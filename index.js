@@ -3,12 +3,16 @@ const { Client, Collection, Events, GatewayIntentBits, Partials } = require('dis
 const { token } = require('./config.json');
 const melonData = require('./data.json');
 
+const galleryChannelID = "1040269017048424509"
+
 const client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions],
 	partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
 client.once(Events.ClientReady, async () => {
+  await countAllMelons();
+  console.log(melonData);
 	console.log('Ready!');
 });
 
@@ -28,14 +32,45 @@ async function reactChange(reaction, reactSign, user) {
 			return;
 		}
 	}
+  if (reaction.message.channelId !== galleryChannelID) {return;}
   let userIDString = user.id.toString();
   let creatorIDString = reaction.message.author.id.toString();
   if (reaction["_emoji"].name === "🍉") {
-    melonData.Recieved[creatorIDString] = melonData.Recieved.hasOwnProperty(creatorIDString) ? melonData.Recieved[creatorIDString] + reactSign : reactSign;
-    melonData.Awarded[userIDString] = melonData.Awarded.hasOwnProperty(userIDString) ? melonData.Awarded[userIDString] + reactSign : reactSign;
+    melonData.received[creatorIDString] = melonData.received.hasOwnProperty(creatorIDString) ? melonData.received[creatorIDString] + reactSign : reactSign;
+    melonData.awarded[userIDString] = melonData.awarded.hasOwnProperty(userIDString) ? melonData.awarded[userIDString] + reactSign : reactSign;
+    updateMelonData();
   }
-  fs.writeFileSync('./data.json', JSON.stringify(melonData, null, 3));
-  console.log(melonData);
+}
+
+async function countAllMelons() {
+  let galleryChannelMessages = await (await client.channels.fetch(galleryChannelID)).messages.fetch();
+  let lastTime = melonData.updatedTime;
+  for (let x of galleryChannelMessages.values()) {
+    if (x.createdTimestamp < melonData.updatedTime) {return;}
+    try {
+      let reactions = await x.reactions.resolve("🍉").users.fetch();
+      let creatorIDString = x.author.id.toString();
+      melonData.received[creatorIDString] = melonData.received.hasOwnProperty(creatorIDString) ? melonData.received[creatorIDString] + reactions.size : reactions.size;
+      reactions.each((reaction,userIDString,a)=>{
+        melonData.awarded[userIDString] = melonData.awarded.hasOwnProperty(userIDString) ? melonData.awarded[userIDString] + 1 : 1;
+      });
+      console.log("Message with melon reaction from "+creatorIDString+" with "+reactions.size+" melons");
+    } catch {}
+  }
+  updateMelonData();
+}
+
+function updateMelonData() {
+  melonData.updatedTime = Date.now();
+  fs.writeFileSync('./data.json', JSON.stringify(melonData, null, 2));
+}
+
+function stringField(field) {
+  let out = "";
+  for (const key in melonData[field]) {
+    out += "<@"+key+"> has "+field+" "+melonData[field][key].toString()+" melons.\n";
+  };
+  return out;
 }
 
 client.login(token);
