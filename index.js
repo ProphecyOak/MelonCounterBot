@@ -5,7 +5,7 @@ const melonData = require('./data.json');
 let dataEditTools = require('./DataEditor.js');
 
 const galleryChannelID = "1040269017048424509"
-const messageYoungSize = 2;
+const messageYoungSize = 30;
 
 const client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions],

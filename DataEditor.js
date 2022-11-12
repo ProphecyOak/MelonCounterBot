@@ -17,6 +17,7 @@ async function addMessageMelons(message, write=true) {
 //addReactionMelons(reaction: MessageReaction, user: String, amount: number)
 async function addReactionMelons(reaction, user, amount) {
   manipulateMelons(reaction.message.author.id.toString(), user, reaction.message.createdTimestamp, amount);
+  writeDataToFile();
 }
 
 //Takes in a number of melons, an awardee, an awarder, and time of message.
