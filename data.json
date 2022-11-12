@@ -1,7 +1,11 @@
 {
-  "updatedTime": 0,
-  "received": {
+  "youngTime": 0,
+  "old": {
+    "received": {},
+    "awarded": {}
   },
-  "awarded": {
+  "young": {
+    "received": {},
+    "awarded": {}
   }
 }

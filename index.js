@@ -2,8 +2,10 @@ const fs = require('fs');
 const { Client, Collection, Events, GatewayIntentBits, Partials } = require('discord.js');
 const { token } = require('./config.json');
 const melonData = require('./data.json');
+let dataEditTools = require('./DataEditor.js');
 
 const galleryChannelID = "1040269017048424509"
+const messageYoungSize = 2;
 
 const client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions],
@@ -11,8 +13,7 @@ const client = new Client({
 });
 
 client.once(Events.ClientReady, async () => {
-  await countAllMelons();
-  console.log(melonData);
+  await countYoungMelons();
 	console.log('Ready!');
 });
 
@@ -34,35 +35,38 @@ async function reactChange(reaction, reactSign, user) {
 	}
   if (reaction.message.channelId !== galleryChannelID) {return;}
   let userIDString = user.id.toString();
-  let creatorIDString = reaction.message.author.id.toString();
-  if (reaction["_emoji"].name === "🍉") {
-    melonData.received[creatorIDString] = melonData.received.hasOwnProperty(creatorIDString) ? melonData.received[creatorIDString] + reactSign : reactSign;
-    melonData.awarded[userIDString] = melonData.awarded.hasOwnProperty(userIDString) ? melonData.awarded[userIDString] + reactSign : reactSign;
-    updateMelonData();
-  }
+  if (reaction["_emoji"].name === "🍉") {dataEditTools.addReactionMelons(reaction, userIDString, reactSign);}
+}
+
+async function countYoungMelons() {
+	dataEditTools.wipeYoungData();
+  let galleryChannelMessages = await (await client.channels.fetch(galleryChannelID)).messages.fetch();
+  let lastTime = melonData.updatedTime;
+	let i = 0;
+  for (let x of galleryChannelMessages.values()) {
+		if (x.createdTimestamp<=dataEditTools.getYoungTime()) {console.log(i);break;}
+		if (i===messageYoungSize) {
+			dataEditTools.setYoungTime(x.createdTimestamp);
+		}
+		await dataEditTools.addMessageMelons(x,false);
+		++i;
+	}
+	dataEditTools.writeDataToFile();
 }
 
 async function countAllMelons() {
+	dataEditTools.setYoungTime(0);
+	dataEditTools.wipeYoungData();
+	dataEditTools.wipeOldData();
   let galleryChannelMessages = await (await client.channels.fetch(galleryChannelID)).messages.fetch();
   let lastTime = melonData.updatedTime;
+	let i = 0;
   for (let x of galleryChannelMessages.values()) {
-    if (x.createdTimestamp < melonData.updatedTime) {return;}
-    try {
-      let reactions = await x.reactions.resolve("🍉").users.fetch();
-      let creatorIDString = x.author.id.toString();
-      melonData.received[creatorIDString] = melonData.received.hasOwnProperty(creatorIDString) ? melonData.received[creatorIDString] + reactions.size : reactions.size;
-      reactions.each((reaction,userIDString,a)=>{
-        melonData.awarded[userIDString] = melonData.awarded.hasOwnProperty(userIDString) ? melonData.awarded[userIDString] + 1 : 1;
-      });
-      console.log("Message with melon reaction from "+creatorIDString+" with "+reactions.size+" melons");
-    } catch {}
-  }
-  updateMelonData();
-}
-
-function updateMelonData() {
-  melonData.updatedTime = Date.now();
-  fs.writeFileSync('./data.json', JSON.stringify(melonData, null, 2));
+		if (i===messageYoungSize) {dataEditTools.setYoungTime(x.createdTimestamp);}
+		await dataEditTools.addMessageMelons(x,false);
+		++i;
+	}
+	dataEditTools.writeDataToFile();
 }
 
 function stringField(field) {
