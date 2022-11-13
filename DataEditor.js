@@ -6,6 +6,7 @@ const fs = require('fs');
 async function addMessageMelons(message, write=true) {
   let meloners = message.reactions.resolve("🍉");
   if (meloners === null) {return;}
+  addPost(message);
   let melonAdders = (await meloners.users.fetch()).keys();
   for (const user of melonAdders) {
     let out = manipulateMelons(message.author.id.toString(),user.toString(),message.createdTimestamp,1);
@@ -39,13 +40,28 @@ function addMelonData(age, creator, user, amount) {
   } else {melonData[age]["awarded"][user] = amount;}
 }
 
+//Modifies first post recorded.
+//setFirstPost(message: Message)
+function setFirstPost(message) {
+  melonData["firstPost"][message.author.id.toString()] = message.createdTimestamp;
+}
+
+//increments post count.
+//addPost(message: Message)
+function addPost(message) {
+  let age = message.createdTimestamp <= melonData.youngTime ? "old" : "young";
+  let creator = message.author.id.toString();
+  if (melonData[age]["postCount"].hasOwnProperty(creator)) {melonData[age].postCount[creator] += 1;}
+  else {melonData[age].postCount[creator] = 1;}
+}
+
 //Sets young time for determining message age.
 //setYoungTime(timeStamp: number)
 function setYoungTime(timeStamp) {melonData.youngTime = timeStamp;}
 function getYoungTime() {return melonData.youngTime;}
 
-function wipeYoungData() {melonData.young = {"received":{},"awarded":{}};}
-function wipeOldData() {melonData.old = {"received":{},"awarded":{}};}
+function wipeYoungData() {melonData.young = {"received": {},"awarded": {},"postCount": {}};}
+function wipeOldData() {melonData.old = {"received": {},"awarded": {},"postCount": {}};}
 
 function printData() {console.log(melonData);}
 
@@ -64,5 +80,7 @@ module.exports = {
   "getYoungTime":getYoungTime,
   "printData":printData,
   "writeDataToFile":writeDataToFile,
-  "melonData": melonData
+  "melonData": melonData,
+  "setFirstPost": setFirstPost,
+  "addPost": addPost
 }

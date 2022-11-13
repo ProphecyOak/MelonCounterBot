@@ -5,7 +5,7 @@ const melonData = require('./data.json');
 let dataEditTools = require('./DataEditor.js');
 
 const galleryChannelID = "1040269017048424509"
-const messageYoungSize = 30;
+const messageYoungSize = 2;
 
 const client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions],
@@ -13,7 +13,7 @@ const client = new Client({
 });
 
 client.once(Events.ClientReady, async () => {
-  await countYoungMelons();
+  await countAllMelons();
 	console.log('Ready!');
 });
 
@@ -48,6 +48,7 @@ async function countYoungMelons() {
 		if (i===messageYoungSize) {
 			dataEditTools.setYoungTime(x.createdTimestamp);
 		}
+		dataEditTools.addPost(x);
 		await dataEditTools.addMessageMelons(x,false);
 		++i;
 	}
@@ -63,6 +64,7 @@ async function countAllMelons() {
 	let i = 0;
   for (let x of galleryChannelMessages.values()) {
 		if (i===messageYoungSize) {dataEditTools.setYoungTime(x.createdTimestamp);}
+		dataEditTools.setFirstPost(x);
 		await dataEditTools.addMessageMelons(x,false);
 		++i;
 	}
