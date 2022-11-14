@@ -1,21 +1,15 @@
 {
   "youngTime": 0,
   "old": {
-    "received": {
-    },
-    "awarded": {
-    },
-    "postCount": {
-    }
+    "received": {},
+    "awarded": {},
+    "postCount": {}
   },
   "young": {
-    "received": {
-    },
-    "awarded": {
-    },
+    "received": {},
+    "awarded": {},
     "postCount": {
     }
   },
-  "firstPost": {
-  }
+  "firstPost": {}
 }

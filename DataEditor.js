@@ -4,9 +4,9 @@ const fs = require('fs');
 //Takes in a message and adds all of the melons on it to the data.
 //addMessageMelons(message: Message)
 async function addMessageMelons(message, write=true) {
+  await addPost(message);
   let meloners = message.reactions.resolve("🍉");
   if (meloners === null) {return;}
-  addPost(message);
   let melonAdders = (await meloners.users.fetch()).keys();
   for (const user of melonAdders) {
     let out = manipulateMelons(message.author.id.toString(),user.toString(),message.createdTimestamp,1);
@@ -48,11 +48,28 @@ function setFirstPost(message) {
 
 //increments post count.
 //addPost(message: Message)
-function addPost(message) {
+async function addPost(message) {
+  message = await message.fetch();
+  if (message.attachments.filter((key, val) => {return key.contentType === 'image/png';}).size === 0) {return;}
   let age = message.createdTimestamp <= melonData.youngTime ? "old" : "young";
   let creator = message.author.id.toString();
   if (melonData[age]["postCount"].hasOwnProperty(creator)) {melonData[age].postCount[creator] += 1;}
-  else {melonData[age].postCount[creator] = 1;}
+  else {
+    melonData[age].postCount[creator] = 1;
+    melonData.firstPost[creator] = message.createdTimestamp;
+  }
+}
+//decrements post count.
+//removePost(message: Message)
+async function removePost(message) {
+  if (message.attachments.filter((key, val) => {return key.contentType === 'image/png';}).size === 0) {return;}
+  let age = message.createdTimestamp <= melonData.youngTime ? "old" : "young";
+  let creator = message.author.id.toString();
+  melonData[age].postCount[creator] -= 1;
+  //Implement if firstPost should be removed when first post is deleted.
+  //As currently implemented, the next first post wont replace it which is problematic.
+  //Would only be fixed on next fullCount or if next first message is in youngMessages, at next youngCount
+  //if (message.createdTimestamp===melonData.firstPost[creator]) {delete melonData.firstPost[creator];}
 }
 
 //Sets young time for determining message age.
@@ -82,5 +99,6 @@ module.exports = {
   "writeDataToFile":writeDataToFile,
   "melonData": melonData,
   "setFirstPost": setFirstPost,
-  "addPost": addPost
+  "addPost": addPost,
+  "removePost": removePost
 }

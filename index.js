@@ -5,7 +5,7 @@ const melonData = require('./data.json');
 let dataEditTools = require('./DataEditor.js');
 
 const galleryChannelID = "1040269017048424509"
-const messageYoungSize = 2;
+const messageYoungSize = 30;
 
 const client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions],
@@ -13,7 +13,7 @@ const client = new Client({
 });
 
 client.once(Events.ClientReady, async () => {
-  await countAllMelons();
+  await countYoungMelons();
 	console.log('Ready!');
 });
 
@@ -22,6 +22,25 @@ client.on(Events.MessageReactionAdd, (reaction, user) => {
 });
 client.on(Events.MessageReactionRemove, (reaction, user) => {
   reactChange(reaction, -1, user);
+});
+client.on(Events.MessageCreate, async message => {
+	message = await message.fetch()
+	let hasImg = message.attachments.filter((key, val) => {
+		return key.contentType === 'image/png';
+	}).size;
+	if (hasImg > 0) {
+		await dataEditTools.addPost(message);
+	}
+	dataEditTools.writeDataToFile();
+});
+client.on(Events.MessageDelete, async message => {
+	let hasImg = message.attachments.filter((key, val) => {
+		return key.contentType === 'image/png';
+	}).size;
+	if (hasImg > 0) {
+		await dataEditTools.removePost(message);
+	}
+	dataEditTools.writeDataToFile();
 });
 
 async function reactChange(reaction, reactSign, user) {
@@ -40,19 +59,20 @@ async function reactChange(reaction, reactSign, user) {
 
 async function countYoungMelons() {
 	dataEditTools.wipeYoungData();
+	dataEditTools.printData();
   let galleryChannelMessages = await (await client.channels.fetch(galleryChannelID)).messages.fetch();
   let lastTime = melonData.updatedTime;
 	let i = 0;
   for (let x of galleryChannelMessages.values()) {
-		if (x.createdTimestamp<=dataEditTools.getYoungTime()) {console.log(i);break;}
+		if (x.createdTimestamp<=dataEditTools.getYoungTime()) {break;}
 		if (i===messageYoungSize) {
 			dataEditTools.setYoungTime(x.createdTimestamp);
 		}
-		dataEditTools.addPost(x);
 		await dataEditTools.addMessageMelons(x,false);
 		++i;
 	}
 	dataEditTools.writeDataToFile();
+	dataEditTools.printData();
 }
 
 async function countAllMelons() {
