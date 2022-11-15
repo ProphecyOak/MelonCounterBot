@@ -6,6 +6,7 @@ let dataEditTools = require('./DataEditor.js');
 
 const galleryChannelID = "708950466746122321"
 const messageYoungSize = 30;
+let startTime;
 
 const client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions],
@@ -13,7 +14,9 @@ const client = new Client({
 });
 
 client.once(Events.ClientReady, async () => {
+	startTime = Date.now();
   await countAllMelons();
+	console.log(`${(Date.now()-startTime)/1000} seconds elapsed.`);
 	console.log('Ready!');
 });
 
@@ -71,17 +74,8 @@ async function reactChange(reaction, reactSign, user) {
 
 async function countYoungMelons() {
 	dataEditTools.wipeYoungData();
-  let galleryChannelMessages = await (await client.channels.fetch(galleryChannelID)).messages.fetch();
-	let i = 0;
-  for (let x of galleryChannelMessages.values()) {
-		if (x.createdTimestamp<=dataEditTools.getYoungTime()) {break;}
-		if (i===messageYoungSize) {
-			dataEditTools.setYoungTime(x.createdTimestamp);
-		}
-		dataEditTools.addPost(x);
-		await dataEditTools.addMessageMelons(x,false);
-		++i;
-	}
+  let galleryChannel = await client.channels.fetch(galleryChannelID);
+	await addMessages(galleryChannel, {messageCount:0, i:0})
 	dataEditTools.writeDataToFile();
 }
 
@@ -91,39 +85,36 @@ async function countAllMelons() {
 	dataEditTools.wipeOldData();
   //let galleryChannelMessages = await (await client.channels.fetch(galleryChannelID)).messages.fetch();
 	let galleryChannelMessages = await lots_of_messages_getter(await client.channels.fetch(galleryChannelID));
+	dataEditTools.writeDataToFile();
 }
 
 async function lots_of_messages_getter(channel, limit = 1000) {
   let last_id;
-	let messageCount = 0;
-	let i = 0;
-
+	let counts = {messageCount:0, i:0}
   while (true) {
     const options = { limit: 100 };
     if (last_id) {options.before = last_id;}
-
-		var messageCollection = await channel.messages.fetch(options);
-    const messages = messageCollection.values();
-		for (const x of messages) {
-			if (i===messageYoungSize) {dataEditTools.setYoungTime(x.createdTimestamp);}
-			let worked = await dataEditTools.checkMessageHasImg(x);
-			messageCount += 1;
-			if (worked) {
-				dataEditTools.addPost(x);
-				await dataEditTools.addMessageMelons(x,false);
-				++i;
-				dataEditTools.writeDataToFile();
-				//console.log(messageCount.toString() + " messages have been read.\n" + "Recording post #" + i.toString() + " from " +
-				//(new Date(x.createdTimestamp)).toString().slice(0,10) +
-				//" created by: " + x.author.id.toString());
-				//await askQuestion(">>>");
-			}
-			if ((messageCount+1)%25===0) {console.log(`${messageCount+1} messages read. ${i} posts found.`);}
-		}
-    last_id = messageCollection.last().id;
-
-    if (messageCollection.size != 100 || messageCount >= limit) {break;}
+		counts = await addMessages(channel, counts,options);
+    last_id = counts.messageCollection.last().id;
+    if (counts.messageCollection.size != 100 || counts.messageCount >= limit) {break;}
   }
+}
+
+async function addMessages(channel, counts, options = {}) {
+	counts.messageCollection = await channel.messages.fetch(options);
+	const messages = counts.messageCollection.values();
+	for (const x of messages) {
+		if (counts.i===messageYoungSize) {dataEditTools.setYoungTime(x.createdTimestamp);}
+		let worked = await dataEditTools.checkMessageHasImg(x);
+		counts.messageCount += 1;
+		if (worked) {
+			dataEditTools.addPost(x);
+			await dataEditTools.addMessageMelons(x,false);
+			counts.i += 1;
+		}
+		if ((counts.messageCount+1)%25===0) {console.log(`Elapsed: ${(Date.now()-startTime)/1000} ${counts.messageCount+1} messages read. ${counts.i} posts found.`);}
+	}
+	return counts;
 }
 
 client.login(token);

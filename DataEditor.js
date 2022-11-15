@@ -3,8 +3,9 @@ const fs = require('fs');
 
 //checkMessageHasImg(message): boolean
 async function checkMessageHasImg(message) {
+  let meloners = message.reactions.resolve("🍉");
   message = await message.fetch();
-  return message.attachments.filter((key, val) => {return key.contentType === 'image/png';}).size !== 0;
+  return meloners !== null || message.attachments.filter((key, val) => {return key.contentType === 'image/png';}).size !== 0;
 }
 
 //Takes in a message and adds all of the melons on it to the data.
