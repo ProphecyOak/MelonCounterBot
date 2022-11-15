@@ -1,17 +1,23 @@
 const melonData = require('./data.json');
 const fs = require('fs');
 
+//checkMessageHasImg(message): boolean
+async function checkMessageHasImg(message) {
+  message = await message.fetch();
+  return message.attachments.filter((key, val) => {return key.contentType === 'image/png';}).size !== 0;
+}
+
 //Takes in a message and adds all of the melons on it to the data.
 //addMessageMelons(message: Message)
 async function addMessageMelons(message, write=true) {
-  await addPost(message);
   let meloners = message.reactions.resolve("🍉");
-  if (meloners === null) {return;}
+  if (meloners === null) {return false;}
   let melonAdders = (await meloners.users.fetch()).keys();
   for (const user of melonAdders) {
     let out = manipulateMelons(message.author.id.toString(),user.toString(),message.createdTimestamp,1);
   }
   if (write) {writeDataToFile();}
+  return true;
 }
 
 //Takes in a reaction and adds or subtracts that melon from the data.
@@ -49,16 +55,17 @@ function setFirstPost(message) {
 //increments post count.
 //addPost(message: Message)
 async function addPost(message) {
-  message = await message.fetch();
-  if (message.attachments.filter((key, val) => {return key.contentType === 'image/png';}).size === 0) {return;}
   let age = message.createdTimestamp <= melonData.youngTime ? "old" : "young";
   let creator = message.author.id.toString();
+
   if (melonData[age]["postCount"].hasOwnProperty(creator)) {melonData[age].postCount[creator] += 1;}
-  else {
-    melonData[age].postCount[creator] = 1;
+  else {melonData[age].postCount[creator] = 1;}
+
+  if (!melonData.firstPost.hasOwnProperty(creator) || message.createdTimestamp <= melonData.firstPost[creator]) {
     melonData.firstPost[creator] = message.createdTimestamp;
   }
 }
+
 //decrements post count.
 //removePost(message: Message)
 async function removePost(message) {
@@ -100,5 +107,6 @@ module.exports = {
   "melonData": melonData,
   "setFirstPost": setFirstPost,
   "addPost": addPost,
-  "removePost": removePost
+  "removePost": removePost,
+  "checkMessageHasImg": checkMessageHasImg
 }
