@@ -1,4 +1,4 @@
-const melonData = require('./data.json');
+const melonData = require('../data.json');
 
 //printUserStats(user: String): String
 function printUserStats(user) {

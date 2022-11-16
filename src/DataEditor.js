@@ -1,4 +1,4 @@
-const melonData = require('./data.json');
+const melonData = require('../data.json');
 const fs = require('fs');
 
 //checkMessageHasImg(message): boolean

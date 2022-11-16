@@ -1,7 +1,8 @@
 const fs = require('fs');
+const { DiscordInteractions } = require("slash-commands");
 const { Client, Collection, Events, GatewayIntentBits, Partials } = require('discord.js');
-const { token } = require('./config.json');
-const melonData = require('./data.json');
+const { token } = require('../config.json');
+const melonData = require('../data.json');
 let dataEditTools = require('./DataEditor.js');
 
 const galleryChannelID = "708950466746122321"
