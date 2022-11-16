@@ -1,7 +1,7 @@
 const melonData = require('../data.json');
 
-//printUserStats(user: String): String
-function printUserStats(user) {
+//getUserStats(user: String): obj
+function getUserStats(user) {
   let creator = {
     user: user,
 
@@ -16,8 +16,11 @@ function printUserStats(user) {
 
     firstPost: melonData.firstPost.hasOwnProperty(user) ? (new Date(melonData.firstPost[user])).toString().slice(0,15) : "N/A"
   };
+  return creator;
+}
 
-
+//strStats(creator: obj): String
+function strStats(creator) {
   let out = `Stats for <@${creator.user}>\n   `;
   out += `First post date: ${creator.firstPost}\n   `;
   out += `Post count: ${creator.oldPosts+creator.youngPosts}\n   `;
@@ -27,4 +30,4 @@ function printUserStats(user) {
   return out;
 }
 
-console.log(printUserStats("272496378532462592"));
+console.log(strStats(getUserStats("272496378532462592")));

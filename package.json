@@ -18,7 +18,6 @@
   },
   "homepage": "https://github.com/ProphecyOak/MelonCounterBot#readme",
   "dependencies": {
-    "discord.js": "^14.6.0",
-    "slash-commands": "^1.5.0"
+    "discord.js": "^14.6.0"
   }
 }

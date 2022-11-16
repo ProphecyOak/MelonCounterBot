@@ -2,9 +2,10 @@
 const fs = require('fs');
 const { DiscordInteractions } = require("slash-commands");
 const { Client, Collection, Events, GatewayIntentBits, Partials } = require('discord.js');
-const { token, galleryChannelID } = require('../config.json');
+const { token, galleryChannelID, publicKey } = require('../config.json');
 const dataEditTools = require('./DataEditor.js');
 const counterTools = require('./countHelper.js');
+const commands = require('./commands.js');
 
 let startTime;
 
@@ -17,7 +18,8 @@ const client = new Client({
 //EVENT HANDLING
 client.once(Events.ClientReady, async () => {
 	startTime = Date.now();
-  await counterTools.countYoungMelons(client);
+	if (dataEditTools.getYoungTime() !== 0) {await counterTools.countYoungMelons(client);}
+	else {await counterTools.countAllMelons(client);}
 	console.log(`${(Date.now()-startTime)/1000} seconds elapsed.`);
 	console.log('Ready!');
 });
