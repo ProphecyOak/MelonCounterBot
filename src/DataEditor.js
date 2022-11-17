@@ -1,10 +1,11 @@
+const { dataAddress } = require("../config.json");
 const melonData = require('../data.json');
 const fs = require('fs');
 
 //checkMessageHasImg(message): boolean
 async function checkMessageHasImg(message) {
   let meloners = message.reactions.resolve("🍉");
-  message = await message.fetch();
+  message = await message.fetch(false);
   return meloners !== null || message.attachments.filter((key, val) => {return key.contentType === 'image/png';}).size !== 0;
 }
 
@@ -67,19 +68,6 @@ async function addPost(message) {
   }
 }
 
-//decrements post count.
-//removePost(message: Message)
-async function removePost(message) {
-  if (message.attachments.filter((key, val) => {return key.contentType === 'image/png';}).size === 0) {return;}
-  let age = message.createdTimestamp <= melonData.youngTime ? "old" : "young";
-  let creator = message.author.id.toString();
-  melonData[age].postCount[creator] -= 1;
-  //Implement if firstPost should be removed when first post is deleted.
-  //As currently implemented, the next first post wont replace it which is problematic.
-  //Would only be fixed on next fullCount or if next first message is in youngMessages, at next youngCount
-  //if (message.createdTimestamp===melonData.firstPost[creator]) {delete melonData.firstPost[creator];}
-}
-
 //Sets young time for determining message age.
 //setYoungTime(timeStamp: number)
 function setYoungTime(timeStamp) {melonData.youngTime = timeStamp;}
@@ -93,7 +81,8 @@ function printData() {console.log(melonData);}
 //Writes the current melonData to the data.json file with spacing of 2
 //writeDataToFile()
 function writeDataToFile() {
-  fs.writeFileSync('./data.json', JSON.stringify(melonData, null, 2));
+  fs.writeFileSync(dataAddress, JSON.stringify(melonData, null, 2));
+  console.log("Data Written to File!");
 }
 
 module.exports = {

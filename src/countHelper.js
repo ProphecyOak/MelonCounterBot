@@ -1,6 +1,5 @@
 //IMPORTS AND DEFAULTS
 const fs = require('fs');
-const { DiscordInteractions } = require("slash-commands");
 const { Client, Collection, Events, GatewayIntentBits, Partials } = require('discord.js');
 const { token, galleryChannelID, messageYoungSize } = require('../config.json');
 const dataEditTools = require('./DataEditor.js');
@@ -19,7 +18,7 @@ async function reactChange(reaction, reactSign, user, channelID) {
 			return;
 		}
 	}
-  if (reaction.message.channelId !== channel) {return;}
+  if (reaction.message.channelId !== channelID) {return;}
   let userIDString = user.id.toString();
   if (reaction["_emoji"].name === "🍉") {dataEditTools.addReactionMelons(reaction, userIDString, reactSign);}
 }
@@ -47,9 +46,9 @@ async function countAllMelons(client) {
 //lots_of_messages_getter(channel: ChannelManager, limit: number)
 async function lots_of_messages_getter(channel, limit = 1000) {
   let last_id;
-	let counts = {messageCount:0, i:0}
+	let counts = {messageCount:0, i:0, startTime: Date.now()}
   while (true) {
-    const options = { limit: 100 };
+    const options = { limit: 100, cache:true };
     if (last_id) {options.before = last_id;}
 		counts = await addMessages(channel, counts, options);
     last_id = counts.messageCollection.last().id;
@@ -71,6 +70,9 @@ async function addMessages(channel, counts, options = {}) {
 			await dataEditTools.addMessageMelons(x,false);
 			counts.i += 1;
 		}
+    if (counts.messageCount % 25 === 0) {
+      console.log(`Elapsed time: ${(Date.now()-counts.startTime)/1000}. ${counts.messageCount} messages read. ${counts.i} posts found.`)
+    }
   }
 	return counts;
 }

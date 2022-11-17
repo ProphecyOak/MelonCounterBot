@@ -1,6 +1,5 @@
 //IMPORTS AND DEFAULTS
 const fs = require('fs');
-const { DiscordInteractions } = require("slash-commands");
 const { Client, Collection, Events, GatewayIntentBits, Partials } = require('discord.js');
 const { token, galleryChannelID, publicKey } = require('../config.json');
 const dataEditTools = require('./DataEditor.js');
@@ -32,10 +31,6 @@ client.on(Events.MessageReactionRemove, (reaction, user) => {
 client.on(Events.MessageCreate, async message => {
 	message = await message.fetch();
 	if (dataEditTools.checkMessageHasImg(message)) {await dataEditTools.addPost(message);}
-	dataEditTools.writeDataToFile();
-});
-client.on(Events.MessageDelete, async message => {
-	if (dataEditTools.checkMessageHasImg(message)) {await dataEditTools.removePost(message);}
 	dataEditTools.writeDataToFile();
 });
 
