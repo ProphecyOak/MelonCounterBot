@@ -2,24 +2,40 @@ const { dataAddress } = require("../config.json");
 const melonData = require('../data.json');
 const fs = require('fs');
 
+module.exports = {addMessageMelons, addReactionMelons, removeReactions, wipeYoungData, wipeOldData,
+  setYoungTime, getYoungTime, printData, writeDataToFile, melonData, setFirstPost, addPost,
+  removePost, checkMessageHasImg
+}
+
 //checkMessageHasImg(message): boolean
-async function checkMessageHasImg(message) {
+async function checkMessageHasImg(message, fetchIt = true) {
   let meloners = message.reactions.resolve("🍉");
-  message = await message.fetch(false);
+  if (fetchIt) {message = await message.fetch(false);}
   return meloners !== null || message.attachments.filter((key, val) => {return key.contentType === 'image/png';}).size !== 0;
 }
 
 //Takes in a message and adds all of the melons on it to the data.
 //addMessageMelons(message: Message)
-async function addMessageMelons(message, write=true) {
+async function addMessageMelons(message, write=true, amount=1, fetchIt=true) {
   let meloners = message.reactions.resolve("🍉");
   if (meloners === null) {return false;}
-  let melonAdders = (await meloners.users.fetch()).keys();
+  let melonAdders;
+  if (fetchIt) {
+    melonAdders = (await meloners.users.fetch()).keys();
+  } else {
+    melonAdders = meloners.users.cache.keys();
+  }
   for (const user of melonAdders) {
-    let out = manipulateMelons(message.author.id.toString(),user.toString(),message.createdTimestamp,1);
+    let out = manipulateMelons(message.author.id.toString(),user.toString(),message.createdTimestamp,amount);
   }
   if (write) {writeDataToFile();}
   return true;
+}
+
+//Subtracts melons based on deleted message's reactions.
+//removeReactions(message: Message)
+async function removeReactions(message) {
+  addMessageMelons(message, true, -1, false);
 }
 
 //Takes in a reaction and adds or subtracts that melon from the data.
@@ -68,6 +84,21 @@ async function addPost(message) {
   }
 }
 
+//decrements post count.
+//removePost(message: Message)
+async function removePost(message) {
+  await removeReactions(message);
+  let age = message.createdTimestamp <= melonData.youngTime ? "old" : "young";
+  let creator = message.author.id.toString();
+  melonData[age].postCount[creator] -= 1;
+  //Implement: remove melons from givers and recievers of message.
+
+  //Implement: if firstPost should be removed when first post is deleted.
+  //As currently implemented, the next first post wont replace it which is problematic.
+  //Would only be fixed on next fullCount or if next first message is in youngMessages, at next youngCount
+  //if (message.createdTimestamp===melonData.firstPost[creator]) {delete melonData.firstPost[creator];}
+}
+
 //Sets young time for determining message age.
 //setYoungTime(timeStamp: number)
 function setYoungTime(timeStamp) {melonData.youngTime = timeStamp;}
@@ -83,20 +114,4 @@ function printData() {console.log(melonData);}
 function writeDataToFile() {
   fs.writeFileSync(dataAddress, JSON.stringify(melonData, null, 2));
   console.log("Data Written to File!");
-}
-
-module.exports = {
-  "addMessageMelons":addMessageMelons,
-  "addReactionMelons":addReactionMelons,
-  "wipeYoungData":wipeYoungData,
-  "wipeOldData":wipeOldData,
-  "setYoungTime":setYoungTime,
-  "getYoungTime":getYoungTime,
-  "printData":printData,
-  "writeDataToFile":writeDataToFile,
-  "melonData": melonData,
-  "setFirstPost": setFirstPost,
-  "addPost": addPost,
-  "removePost": removePost,
-  "checkMessageHasImg": checkMessageHasImg
 }

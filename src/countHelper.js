@@ -28,7 +28,7 @@ async function reactChange(reaction, reactSign, user, channelID) {
 async function countYoungMelons(client) {
 	dataEditTools.wipeYoungData();
   let galleryChannel = await client.channels.fetch(galleryChannelID);
-	await addMessages(galleryChannel, {messageCount:0, i:0})
+	await addMessages(galleryChannel, {messageCount:0, i:0, startTime: Date.now()})
 	dataEditTools.writeDataToFile();
 }
 
