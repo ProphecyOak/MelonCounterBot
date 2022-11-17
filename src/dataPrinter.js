@@ -1,5 +1,7 @@
 const melonData = require('../data.json');
 
+module.exports = { strStats }
+
 //getUserStats(user: String): obj
 function getUserStats(user) {
   let creator = {
@@ -19,9 +21,14 @@ function getUserStats(user) {
   return creator;
 }
 
-//strStats(creator: obj): String
-function strStats(creator) {
-  let out = `Stats for <@${creator.user}>\n   `;
+//strStats(user: String): String
+async function strStats(interaction) {
+  let user = interaction.options.resolved.users.at(0);
+  let member = await interaction.guild.members.fetch(user);
+  let username = member.nickname!==null ? member.nickname : user.username;
+  let creator = getUserStats(user.id);
+
+  let out = `Stats for **${username}**\n   `;
   out += `First post date: ${creator.firstPost}\n   `;
   out += `Post count: ${creator.oldPosts+creator.youngPosts}\n   `;
   out += `Melons recieved: ${creator.oldReceivedMelons+creator.youngReceivedMelons}\n   `;
@@ -29,5 +36,3 @@ function strStats(creator) {
   out += `Avg melons per post: ${Math.round((creator.oldReceivedMelons+creator.youngReceivedMelons)/(creator.oldPosts+creator.youngPosts)*100)/100}`;
   return out;
 }
-
-console.log(strStats(getUserStats("272496378532462592")));

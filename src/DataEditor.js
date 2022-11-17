@@ -113,5 +113,5 @@ function printData() {console.log(melonData);}
 //writeDataToFile()
 function writeDataToFile() {
   fs.writeFileSync(dataAddress, JSON.stringify(melonData, null, 2));
-  console.log("Data Written to File!");
+  //console.log("Data Written to File!");
 }
