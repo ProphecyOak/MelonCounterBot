@@ -46,6 +46,7 @@ client.on(Events.MessageReactionRemove, (reaction, user) => {
   counterTools.reactChange(reaction, -1, user, galleryChannelID);
 });
 client.on(Events.MessageCreate, async message => {
+	if (message.channelId !== galleryChannelID) {return;}
 	message = await message.fetch();
 	if (dataEditTools.checkMessageHasImg(message)) {await dataEditTools.addPost(message);}
 	dataEditTools.writeDataToFile();
