@@ -31,7 +31,7 @@ async function strStats(interaction) {
   let out = `Stats for **${username}**\n   `;
   out += `First post date: ${creator.firstPost}\n   `;
   out += `Post count: ${creator.oldPosts+creator.youngPosts}\n   `;
-  out += `Melons recieved: ${creator.oldReceivedMelons+creator.youngReceivedMelons}\n   `;
+  out += `Melons received: ${creator.oldReceivedMelons+creator.youngReceivedMelons}\n   `;
   out += `Melons given: ${creator.oldAwardedMelons+creator.youngAwardedMelons}\n   `;
   out += `Avg melons per post: ${Math.round((creator.oldReceivedMelons+creator.youngReceivedMelons)/(creator.oldPosts+creator.youngPosts)*100)/100}`;
   return out;
