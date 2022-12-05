@@ -1,6 +1,6 @@
 const melonData = require('../data.json');
 
-module.exports = { strStats }
+module.exports = { strStats, strLeaderboard }
 
 //getUserStats(user: String): obj
 function getUserStats(user) {
@@ -35,4 +35,17 @@ async function strStats(interaction) {
   out += `Melons given: ${creator.oldAwardedMelons+creator.youngAwardedMelons}\n   `;
   out += `Avg melons per post: ${Math.round((creator.oldReceivedMelons+creator.youngReceivedMelons)/(creator.oldPosts+creator.youngPosts)*100)/100}`;
   return out;
+}
+
+//strLeaderboard(statChoice: String): String
+async function strLeaderboard(statChoice) {
+  let out = "";
+  if (statChoice==="melonAvg") {
+    
+  } else if (statChoice==="postFreq") {
+
+  } else {
+
+  }
+  return;
 }
