@@ -34,7 +34,8 @@ for (const file of commandFiles) {
 client.once(Events.ClientReady, async () => {
 	startTime = Date.now();
 	console.log("Booting Up...")
-	if (dataEditTools.getYoungTime() !== 0) {await counterTools.countYoungMelons(client);}
+	console.log(await dataEditTools.getYoungTime());
+	if (await dataEditTools.getYoungTime() !== undefined) {await counterTools.checkYoungData(client);}
 	else {await counterTools.countAllMelons(client);}
 	console.log(`${(Date.now()-startTime)/1000} seconds elapsed.`);
 	console.log('Ready!');
@@ -47,15 +48,14 @@ client.on(Events.MessageReactionRemove, (reaction, user) => {
 });
 client.on(Events.MessageCreate, async message => {
 	if (message.channelId !== galleryChannelID) {return;}
+	counterTools.checkIfRebuild(client); //Check on message if its time to build new YoungData
 	message = await message.fetch();
-	if (dataEditTools.checkMessageHasImg(message)) {await dataEditTools.addPost(message);}
-	dataEditTools.writeDataToFile();
+	if (await dataEditTools.checkMessageHasImg(message)) {await dataEditTools.addPost(message);}
 });
 client.on(Events.MessageDelete, async message => {
-	if (dataEditTools.checkMessageHasImg(message, false)) {
+	if (await dataEditTools.checkMessageHasImg(message, false)) {
 		await dataEditTools.removePost(message);
 	}
-	dataEditTools.writeDataToFile();
 });
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
