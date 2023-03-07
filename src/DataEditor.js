@@ -32,7 +32,6 @@ async function addReactionMelons(reaction, user, amount) {
 async function removePost(message) {
   let young = message.createdTimestamp > await getYoungTime();
   let melonAdders = await getMelonAdders(message, false);
-  console.log(melonAdders);
   if (melonAdders === [] || melonAdders === undefined || melonAdders === null) return;
   let melons = 0;
   for (const m of melonAdders){
@@ -40,7 +39,6 @@ async function removePost(message) {
     if(young) db.incrementData("YoungData", {"_id": m}, {"awarded": -1});
     melons++;
   }
-  console.log(melons);
   //Doesn't modify first post date. Unlikely removed is first post. Not fatal if it is.
   db.removePostData("MainData", message.author.id, melons);
   if(young) db.removePostData("YoungData", message.author.id, melons);
