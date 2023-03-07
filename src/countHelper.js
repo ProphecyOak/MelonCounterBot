@@ -93,7 +93,7 @@ async function fetchYoungMessages(channel, localYoungData, youngTime, limit = 10
 		console.log("Found %d young posts", posts.length)
 		last_id = messageCollection.last().id;
 		localYoungData = await addToLocalYoungData(posts, localYoungData);
-    	if (messageCollection.size != 100 ||  counts.messageCount >= limit || messageCollection.last().createdTimestamp < youngTime) {break;}
+    	if (messageCollection.size != 100 || messageCollection.last().createdTimestamp < youngTime) {break;}
  	}
 	return localYoungData;
 }
