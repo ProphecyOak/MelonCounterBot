@@ -1,6 +1,6 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const { mongoToken } = require('../config.json');
-const url = "mongodb+srv://melonBot:"+mongoToken+"@mcfvt.rroycww.mongodb.net/?retryWrites=true&w=majority";
+const url = "mongodb+srv://melonBot:"+mongoToken+"@melondata.jltseqr.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 const db = client.db("Melons");
 
@@ -121,7 +121,7 @@ async function incrementData(coll, find, change) {
 async function addPostData(coll, user, melons, time){
   const collection = db.collection(coll)
 
-  collection.updateOne({"_id": user}, {$inc: {"received": melons, "count": 1}, $min: {"first": time}}, {upsert: true})
+  collection.updateOne({"_id": user.id}, {$set: {"User":user.username}, $inc: {"received": melons, "count": 1}, $min: {"first": time}}, {upsert: true})
   .then(() => {
     //console.log("Added post");
   })
@@ -155,4 +155,3 @@ async function drop(coll){
     console.error("Drop Error:\n%S",error);
   }
 }
-

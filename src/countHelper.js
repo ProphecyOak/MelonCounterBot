@@ -104,7 +104,7 @@ async function addToLocalYoungData(posts, localYoungData){
 		let melonAdders = await dataEditTools.getMelonAdders(p, true);
 		let melons = 0;
 		let current;
-		
+
 		for (m of melonAdders){
 			current = localYoungData[m];
 			if(current === null || current === undefined){
@@ -131,7 +131,7 @@ async function countAllMelons(client) {
 	await dataEditTools.wipeMainData();
   	lots_of_messages_getter(await client.channels.fetch(galleryChannelID));
 	await rebuildYoungData(client, Date.now()-2629800000, true);
-	
+
 }
 
 //Continues to fetch old messages and add them to melonData.

@@ -24,7 +24,7 @@ async function addReactionMelons(reaction, user, amount) {
   if(young){
     db.incrementData("YoungData", {"_id": user}, {"awarded": amount});
     db.incrementData("YoungData", {"_id": author}, {"received": amount});
-  } 
+  }
 }
 
 //decrements post count.
@@ -51,8 +51,8 @@ function wipeMainData() {return db.drop("MainData")}
 
 //adds a new Post
 async function addPost (post){
-  db.addPostData("YoungData", post.author.id, 0, post.createdTimestamp);
-  db.addPostData("MainData", post.author.id, 0, post.createdTimestamp);
+  db.addPostData("YoungData", post.author, 0, post.createdTimestamp);
+  db.addPostData("MainData", post.author, 0, post.createdTimestamp);
 }
 
 //add full recount posts to MainData
@@ -64,8 +64,8 @@ async function addPosts (posts){
       for (const m of melonAdders){
         db.incrementData("MainData", {"_id": m}, {"awarded": 1});
         melons++;
-      } 
-      db.addPostData("MainData", p.author.id, melons, p.createdTimestamp);
+      }
+      db.addPostData("MainData", p.author, melons, p.createdTimestamp);
   }
 }
 
@@ -80,4 +80,3 @@ async function getMelonAdders(message, fetchIt=true) {
   }
   return melonAdders;
 }
-
