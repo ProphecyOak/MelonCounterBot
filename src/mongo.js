@@ -1,7 +1,6 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const { mongoToken } = require('../config.json');
-const url = "mongodb+srv://melonBot:"+mongoToken+"@melondata.jltseqr.mongodb.net/?retryWrites=true&w=majority";
-const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+const { mongoUrl } = require('../config.json');
+const client = new MongoClient(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 const db = client.db("Melons");
 
 module.exports = {insertSingleData, insertMultipleData, updateData, getYoungTime, setYoungTime, getSingleData, getMultipleData, operatorUpdateData, incrementData, addPostData, removePostData, drop}

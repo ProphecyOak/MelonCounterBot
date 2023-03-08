@@ -85,7 +85,7 @@ async function fetchYoungMessages(channel, localYoungData, youngTime, limit = 10
 		let posts = [];
 		for (const x of messages) {
 			if (x.createdTimestamp < youngTime) break;
-			let worked = await dataEditTools.checkMessageHasImg(x);
+			let worked = await dataEditTools.checkMessageIsPost(x);
 			if (worked) {
 				posts.push(x)
 			}
@@ -155,7 +155,7 @@ async function addMessages(channel, counts, options = {}) {
 	const messages = counts.messageCollection.values();
 	let posts = [];
 	for (const x of messages) {
-		let worked = await dataEditTools.checkMessageHasImg(x);
+		let worked = await dataEditTools.checkMessageIsPost(x);
 		counts.messageCount += 1;
 		if (worked) {
 			posts.push(x)

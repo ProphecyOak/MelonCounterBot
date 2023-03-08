@@ -50,10 +50,10 @@ client.on(Events.MessageCreate, async message => {
 	if (message.channelId !== galleryChannelID) {return;}
 	counterTools.checkIfRebuild(client); //Check on message if its time to build new YoungData
 	message = await message.fetch();
-	if (await dataEditTools.checkMessageHasImg(message)) {await dataEditTools.addPost(message);}
+	if (await dataEditTools.checkMessageIsPost(message)) {await dataEditTools.addPost(message);}
 });
 client.on(Events.MessageDelete, async message => {
-	if (await dataEditTools.checkMessageHasImg(message, false)) {
+	if (await dataEditTools.checkMessageIsPost(message, false)) {
 		await dataEditTools.removePost(message);
 	}
 });
