@@ -30,8 +30,6 @@ async function addReactionMelons(reaction, user, amount) {
   let hasImage = await checkMessageHasImage(reaction.message);
   let countAdjustment = 0;
   let melonAdders = await getMelonAdders(reaction.message, true);
-  console.log(hasImage);
-  console.log(melonAdders);
   if (melonAdders === [] || melonAdders === undefined || melonAdders === null) {
     countAdjustment = hasImage? 0 : -1
   } else {
