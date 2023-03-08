@@ -105,15 +105,17 @@ async function addToLocalYoungData(posts, localYoungData){
 		let melons = 0;
 		let current;
 
-		for (m of melonAdders){
-			current = localYoungData[m];
-			if(current === null || current === undefined){
-			localYoungData[m] = {received:0, awarded:1, count:0, first:Number.MAX_SAFE_INTEGER};
-			} else {
-			localYoungData[m] = {received:current.received, awarded: current.awarded +1, count:current.count, first:current.first};
-			}
-			melons++;
-		}
+    if (melonAdders != null) {
+  		for (m of melonAdders){
+  			current = localYoungData[m];
+  			if(current === null || current === undefined){
+  			localYoungData[m] = {received:0, awarded:1, count:0, first:Number.MAX_SAFE_INTEGER};
+  			} else {
+  			localYoungData[m] = {received:current.received, awarded: current.awarded +1, count:current.count, first:current.first};
+  			}
+  			melons++;
+  		}
+    }
 		current = localYoungData[author];
 		if(current === null || current === undefined){
 			localYoungData[author] = {received:melons, awarded:0, count:1, first:p.createdTimestamp};

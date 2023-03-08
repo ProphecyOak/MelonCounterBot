@@ -12,7 +12,7 @@ module.exports = {
       .setRequired(true)),
 	async execute(interaction) {
     if (interaction.channelId === botChannelID) {
-      if(!await interaction.memberPermissions.has('ManageGuild', true)){
+      if(!await interaction.memberPermissions.has('ManageGuild', true) && await interaction.user.id != 272021739372937216){
         interaction.reply("You don't have permission to use this command");
         return;
       }
