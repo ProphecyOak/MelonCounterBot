@@ -30,14 +30,13 @@ async function addReactionMelons(reaction, user, amount) {
   let hasImage = await checkMessageHasImage(reaction.message);
   let countAdjustment = 0;
   let melonAdders = await getMelonAdders(reaction.message, true);
-  if (melonAdders === [] || melonAdders === undefined || melonAdders === null) {
+  if (melonAdders === null) {
     countAdjustment = hasImage? 0 : -1
   } else {
     melonAdders.next();
     countAdjustment = melonAdders.next().done ? (amount == -1 ? 0 : (hasImage ? 0 : 1)) : 0;
   }
 
-  console.log(countAdjustment);
   db.incrementData("MainData", {"_id": user}, {"awarded": amount});
   db.incrementData("MainData", {"_id": author}, {"received": amount, "count": countAdjustment});
   if(young){
@@ -51,12 +50,13 @@ async function addReactionMelons(reaction, user, amount) {
 async function removePost(message) {
   let young = message.createdTimestamp > await getYoungTime();
   let melonAdders = await getMelonAdders(message, false);
-  if (melonAdders === [] || melonAdders === undefined || melonAdders === null) return;
   let melons = 0;
-  for (const m of melonAdders){
-    db.incrementData("MainData", {"_id": m}, {"awarded": -1});
-    if(young) db.incrementData("YoungData", {"_id": m}, {"awarded": -1});
-    melons++;
+  if (melonAdders !== null){
+    for (const m of melonAdders){
+      db.incrementData("MainData", {"_id": m}, {"awarded": -1});
+      if(young) db.incrementData("YoungData", {"_id": m}, {"awarded": -1});
+      melons++;
+    }
   }
   //Doesn't modify first post date. Unlikely removed is first post. Not fatal if it is.
   db.removePostData("MainData", message.author.id, melons);
@@ -77,14 +77,15 @@ async function addPost (post){
 //add full recount posts to MainData
 async function addPosts (posts){
   for (const p of posts){
-      let melonAdders = await getMelonAdders(p, true);
-      if (melonAdders === [] || melonAdders === undefined || melonAdders === null) continue;
-      let melons = 0
+    let melonAdders = await getMelonAdders(p, true);
+    let melons = 0;
+    if (melonAdders !== null){
       for (const m of melonAdders){
         db.incrementData("MainData", {"_id": m}, {"awarded": 1});
         melons++;
       }
-      db.addPostData("MainData", p.author, melons, p.createdTimestamp);
+    }
+    db.addPostData("MainData", p.author, melons, p.createdTimestamp);
   }
 }
 

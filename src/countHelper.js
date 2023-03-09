@@ -73,7 +73,7 @@ async function rebuildYoungData(client, youngTime, save = false){
 	return localYoungData;
 }
 
-async function fetchYoungMessages(channel, localYoungData, youngTime, limit = 1000){
+async function fetchYoungMessages(channel, localYoungData, youngTime){
 
 	let last_id;
 	while (true) {
@@ -105,17 +105,17 @@ async function addToLocalYoungData(posts, localYoungData){
 		let melons = 0;
 		let current;
 
-    if (melonAdders != null) {
-  		for (m of melonAdders){
-  			current = localYoungData[m];
-  			if(current === null || current === undefined){
-  			localYoungData[m] = {received:0, awarded:1, count:0, first:Number.MAX_SAFE_INTEGER};
-  			} else {
-  			localYoungData[m] = {received:current.received, awarded: current.awarded +1, count:current.count, first:current.first};
-  			}
-  			melons++;
-  		}
-    }
+		if (melonAdders !== null) {
+			for (m of melonAdders){
+				current = localYoungData[m];
+				if(current === null || current === undefined){
+				localYoungData[m] = {received:0, awarded:1, count:0, first:Number.MAX_SAFE_INTEGER};
+				} else {
+				localYoungData[m] = {received:current.received, awarded: current.awarded +1, count:current.count, first:current.first};
+				}
+				melons++;
+			}
+		}
 		current = localYoungData[author];
 		if(current === null || current === undefined){
 			localYoungData[author] = {received:melons, awarded:0, count:1, first:p.createdTimestamp};
@@ -137,8 +137,8 @@ async function countAllMelons(client) {
 }
 
 //Continues to fetch old messages and add them to melonData.
-//lots_of_messages_getter(channel: ChannelManager, limit: number)
-async function lots_of_messages_getter(channel, limit = 1000) {
+//lots_of_messages_getter(channel: ChannelManager)
+async function lots_of_messages_getter(channel) {
   let last_id;
 	let counts = {messageCount:0, i:0, startTime: Date.now()}
   while (true) {
@@ -146,7 +146,7 @@ async function lots_of_messages_getter(channel, limit = 1000) {
     if (last_id) {options.before = last_id;}
 		counts = await addMessages(channel, counts, options);
     last_id = counts.messageCollection.last().id;
-    if (counts.messageCollection.size != 100 || counts.messageCount >= limit) {break;}
+    if (counts.messageCollection.size != 100) {break;}
   }
 }
 
