@@ -117,10 +117,12 @@ async function incrementData(coll, find, change) {
 }
 
 //Adds post data to the given collection
-async function addPostData(coll, user, melons, time){
+async function addPostData(coll, post, melons){
   const collection = db.collection(coll)
+  const member = await post.guild.members.fetch(post.author.id);
+  const username = member.nickname!==null ? member.nickname : post.author.username;
 
-  collection.updateOne({"_id": user.id}, {$set: {"User":user.username}, $inc: {"received": melons, "count": 1}, $min: {"first": time}}, {upsert: true})
+  collection.updateOne({"_id": post.author.id}, {$set: {"User":username}, $inc: {"received": melons, "count": 1}, $min: {"first": post.createdTimestamp}}, {upsert: true})
   .then(() => {
     //console.log("Added post");
   })

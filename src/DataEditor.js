@@ -70,8 +70,8 @@ function wipeMainData() {return db.drop("MainData")}
 
 //adds a new Post
 async function addPost (post){
-  db.addPostData("YoungData", post.author, 0, post.createdTimestamp);
-  db.addPostData("MainData", post.author, 0, post.createdTimestamp);
+  db.addPostData("YoungData", post, 0);
+  db.addPostData("MainData", post, 0);
 }
 
 //add full recount posts to MainData
@@ -85,7 +85,7 @@ async function addPosts (posts){
         melons++;
       }
     }
-    db.addPostData("MainData", p.author, melons, p.createdTimestamp);
+    db.addPostData("MainData", p, melons);
   }
 }
 
