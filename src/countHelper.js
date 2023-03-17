@@ -66,7 +66,7 @@ async function rebuildYoungData(client, youngTime, save = false){
 		for (a in localYoungData){
 			toWrite.push({_id: a, received:localYoungData[a].received, awarded:localYoungData[a].awarded, count:localYoungData[a].count, first:localYoungData[a].first})
 		}
-		db.insertMultipleData("YoungData", toWrite);
+		if(toWrite.length > 0) db.insertMultipleData("YoungData", toWrite);
 		await db.setYoungTime(youngTime);
 
 	}
@@ -144,10 +144,11 @@ async function lots_of_messages_getter(channel) {
   while (true) {
     const options = { limit: 100, cache:true };
     if (last_id) {options.before = last_id;}
-		counts = await addMessages(channel, counts, options);
-    last_id = counts.messageCollection.last().id;
-    if (counts.messageCollection.size != 100) {break;}
+	counts = await addMessages(channel, counts, options);
+	if (counts.messageCollection.size == 0) {break;}
+	last_id = counts.messageCollection.last().id;
   }
+  console.log("Fetched all!")
 }
 
 //Adds all of the messages from a single fetch to melonData.
