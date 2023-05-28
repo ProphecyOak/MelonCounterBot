@@ -3,9 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const { Client, Collection, Events, GatewayIntentBits, Partials } = require('discord.js');
 const { token, galleryChannelID, publicKey } = require('../config.json');
-const dataEditTools = require('./DataEditor.js');
-const counterTools = require('./countHelper.js');
 
+//FOR TRACKING ELAPSED TIME
 let startTime;
 
 //CREATE DISCORD CLIENT
@@ -31,6 +30,7 @@ for (const file of commandFiles) {
 }
 
 //EVENT HANDLING
+//ON STARTUP
 client.once(Events.ClientReady, async () => {
 	startTime = Date.now();
 	console.log("Booting Up...")
@@ -40,23 +40,24 @@ client.once(Events.ClientReady, async () => {
 	console.log(`${(Date.now()-startTime)/1000} seconds elapsed.`);
 	console.log('Ready!');
 });
+//ON MESSAGE REACT
 client.on(Events.MessageReactionAdd, (reaction, user) => {
-  counterTools.reactChange(reaction, 1, user, galleryChannelID);
+	//ADD MELON
 });
+//ON MESSAGE UNREACT
 client.on(Events.MessageReactionRemove, (reaction, user) => {
-  counterTools.reactChange(reaction, -1, user, galleryChannelID);
+	//SUBTRACT MELON
 });
+//ON POST
 client.on(Events.MessageCreate, async message => {
 	if (message.channelId !== galleryChannelID) {return;}
-	counterTools.checkIfRebuild(client); //Check on message if its time to build new YoungData
-	message = await message.fetch();
-	if (await dataEditTools.checkMessageHasImg(message)) {await dataEditTools.addPost(message);}
+	//ADD POST TO POSTS AND SUCH
 });
+//ON DELETE POST
 client.on(Events.MessageDelete, async message => {
-	if (await dataEditTools.checkMessageHasImg(message, false)) {
-		await dataEditTools.removePost(message);
-	}
+	//IF ITS A POST, REMOVE IT
 });
+//ON COMMAND INTERACTION
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 	const command = interaction.client.commands.get(interaction.commandName);
@@ -70,7 +71,6 @@ client.on(Events.InteractionCreate, async interaction => {
 		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 	}
 });
-
 
 //LOGIN THE CLIENT
 client.login(token);
