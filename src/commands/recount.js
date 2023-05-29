@@ -1,6 +1,5 @@
 const { SlashCommandBuilder, UserManager } = require('discord.js');
 const { botChannelID } = require('../../config.json');
-const counterTools = require('../countHelper.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -18,8 +17,12 @@ module.exports = {
       }
   		await interaction.reply("This might take a while. You will be notified when done.");
       startTime = Date.now();
-      if (!interaction.options.getBoolean('all')) {await counterTools.checkYoungData(interaction.client);}
-      else {await counterTools.countAllMelons(interaction.client);}
+      if (!interaction.options.getBoolean('all')) {
+				//FIX THIS await counterTools.checkYoungData(interaction.client);
+			}
+      else {
+				//FIX THIS await counterTools.countAllMelons(interaction.client);
+			}
       //Don't follow up becasue it could take longer than 15 min
       await interaction.channel.send(`<@${interaction.user.id}> Recount completed in ${(Date.now()-startTime)/1000} seconds.`);
     } else {

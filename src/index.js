@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { Client, Collection, Events, GatewayIntentBits, Partials } = require('discord.js');
 const { token, galleryChannelID, publicKey } = require('../config.json');
+const db = require("./mongo.js");
 
 //FOR TRACKING ELAPSED TIME
 let startTime;
@@ -34,9 +35,8 @@ for (const file of commandFiles) {
 client.once(Events.ClientReady, async () => {
 	startTime = Date.now();
 	console.log("Booting Up...")
-	console.log(await dataEditTools.getYoungTime());
-	if (await dataEditTools.getYoungTime() !== undefined) {await counterTools.checkYoungData(client);}
-	else {await counterTools.countAllMelons(client);}
+	//CHECK THE THINGS
+	db.dropAll();
 	console.log(`${(Date.now()-startTime)/1000} seconds elapsed.`);
 	console.log('Ready!');
 });
@@ -51,11 +51,12 @@ client.on(Events.MessageReactionRemove, (reaction, user) => {
 //ON POST
 client.on(Events.MessageCreate, async message => {
 	if (message.channelId !== galleryChannelID) {return;}
-	//ADD POST TO POSTS AND SUCH
+	db.addPost(message);
 });
 //ON DELETE POST
 client.on(Events.MessageDelete, async message => {
-	//IF ITS A POST, REMOVE IT
+	if (message.channelId !== galleryChannelID) {return;}
+	db.removePost(message);
 });
 //ON COMMAND INTERACTION
 client.on(Events.InteractionCreate, async interaction => {
