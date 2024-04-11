@@ -4,6 +4,8 @@ const path = require('path');
 const { Client, Collection, Events, GatewayIntentBits, Partials } = require('discord.js');
 const { token, galleryChannelID, publicKey } = require('../config.json');
 
+const eventHandler = require("./eventHandler.js");
+
 let startTime;
 
 //CREATE DISCORD CLIENT
@@ -39,6 +41,36 @@ client.once(Events.ClientReady, async () => {
 	console.log('Ready!');
 });
 
+//	ON CREATE FORUM POST
+client.on(Events.ThreadCreate, async thread => {
+	if (thread.parentId === galleryChannelID) {
+		await eventHandler.threadCreation(thread, client);
+	}
+});
+
+//	ON DELETE FORUM POST
+client.on(Events.ThreadDelete, async thread => {
+	if (thread.parentId === galleryChannelID) {
+		await eventHandler.threadDeletion(thread, client);
+	}
+});
+
+// SLASH COMMAND
+client.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isChatInputCommand()) return;
+	const command = interaction.client.commands.get(interaction.commandName);
+	if (!command) {
+		console.error(`No command matching ${interaction.commandName} was found.`);
+		return;
+	}
+	try {await command.execute(interaction);}
+	catch (error) {
+		console.error(error);
+		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+	}
+});
+
+
 // OLD EVENT HANDLING ----- REMOVED FOR REMAKE TO USE THE FORUM CHANNEL
 // client.on(Events.MessageReactionAdd, (reaction, user) => {
 //   counterTools.reactChange(reaction, 1, user, galleryChannelID);
@@ -57,19 +89,6 @@ client.once(Events.ClientReady, async () => {
 // 		await dataEditTools.removePost(message);
 // 	}
 // });
-client.on(Events.InteractionCreate, async interaction => {
-	if (!interaction.isChatInputCommand()) return;
-	const command = interaction.client.commands.get(interaction.commandName);
-	if (!command) {
-		console.error(`No command matching ${interaction.commandName} was found.`);
-		return;
-	}
-	try {await command.execute(interaction);}
-	catch (error) {
-		console.error(error);
-		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-	}
-});
 
 
 //LOGIN THE CLIENT
