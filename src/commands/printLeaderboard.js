@@ -1,6 +1,5 @@
 const { SlashCommandBuilder, UserManager } = require('discord.js');
 const { botChannelID } = require('../../config.json');
-const dataPrinterTools = require('../dataPrinter.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()

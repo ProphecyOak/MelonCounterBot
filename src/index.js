@@ -3,8 +3,6 @@ const fs = require('fs');
 const path = require('path');
 const { Client, Collection, Events, GatewayIntentBits, Partials } = require('discord.js');
 const { token, galleryChannelID, publicKey } = require('../config.json');
-const dataEditTools = require('./DataEditor.js');
-const counterTools = require('./countHelper.js');
 
 let startTime;
 
@@ -34,10 +32,10 @@ for (const file of commandFiles) {
 client.once(Events.ClientReady, async () => {
 	startTime = Date.now();
 	console.log("Booting Up...")
-	console.log(await dataEditTools.getYoungTime());
-	if (await dataEditTools.getYoungTime() !== undefined) {await counterTools.checkYoungData(client);}
-	else {await counterTools.countAllMelons(client);}
-	console.log(`${(Date.now()-startTime)/1000} seconds elapsed.`);
+	// console.log(await dataEditTools.getYoungTime());
+	// if (await dataEditTools.getYoungTime() !== undefined) {await counterTools.checkYoungData(client);}
+	// else {await counterTools.countAllMelons(client);}
+	// console.log(`${(Date.now()-startTime)/1000} seconds elapsed.`);
 	console.log('Ready!');
 });
 
