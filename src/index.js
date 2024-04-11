@@ -40,23 +40,25 @@ client.once(Events.ClientReady, async () => {
 	console.log(`${(Date.now()-startTime)/1000} seconds elapsed.`);
 	console.log('Ready!');
 });
-client.on(Events.MessageReactionAdd, (reaction, user) => {
-  counterTools.reactChange(reaction, 1, user, galleryChannelID);
-});
-client.on(Events.MessageReactionRemove, (reaction, user) => {
-  counterTools.reactChange(reaction, -1, user, galleryChannelID);
-});
-client.on(Events.MessageCreate, async message => {
-	if (message.channelId !== galleryChannelID) {return;}
-	counterTools.checkIfRebuild(client); //Check on message if its time to build new YoungData
-	message = await message.fetch();
-	if (await dataEditTools.checkMessageHasImg(message)) {await dataEditTools.addPost(message);}
-});
-client.on(Events.MessageDelete, async message => {
-	if (await dataEditTools.checkMessageHasImg(message, false)) {
-		await dataEditTools.removePost(message);
-	}
-});
+
+// OLD EVENT HANDLING ----- REMOVED FOR REMAKE TO USE THE FORUM CHANNEL
+// client.on(Events.MessageReactionAdd, (reaction, user) => {
+//   counterTools.reactChange(reaction, 1, user, galleryChannelID);
+// });
+// client.on(Events.MessageReactionRemove, (reaction, user) => {
+//   counterTools.reactChange(reaction, -1, user, galleryChannelID);
+// });
+// client.on(Events.MessageCreate, async message => {
+// 	if (message.channelId !== galleryChannelID) {return;}
+// 	counterTools.checkIfRebuild(client); //Check on message if its time to build new YoungData
+// 	message = await message.fetch();
+// 	if (await dataEditTools.checkMessageHasImg(message)) {await dataEditTools.addPost(message);}
+// });
+// client.on(Events.MessageDelete, async message => {
+// 	if (await dataEditTools.checkMessageHasImg(message, false)) {
+// 		await dataEditTools.removePost(message);
+// 	}
+// });
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 	const command = interaction.client.commands.get(interaction.commandName);
