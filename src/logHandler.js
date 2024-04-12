@@ -17,7 +17,8 @@ const maxLevelLength = logLevels.reduce((acc, e) => acc.length > e.length ? acc 
 function logEvent(eventText, level) {
     const levelText = logLevels[level]
     const padding = maxLevelLength - levelText.length;
-    console.log(`[ ${levelText} ]${" ".repeat(padding)}  ${eventText}`);
+    eventText = eventText.split("").reduce((acc, e) => acc + (e === "\n" ? "\n" + " ".repeat(maxLevelLength+5) + "-" : e)).toString();
+    console.log(`[ ${levelText} ]${" ".repeat(padding)} -${eventText}`);
 }
 
 module.exports = { logEvent, levels};

@@ -58,4 +58,12 @@ async function changePostCount(user, amnt) {
     });
 }
 
-module.exports = { login, dropAll, changeMelonCounts, changePostCount };
+//	--------    USER VIEWING    --------
+
+//  Grab the record for a given user
+async function getUserDoc(user) {
+    const result = await db.collection("Users").find({"_id": {$eq: user.id}}).toArray();
+    return result[0];
+}
+
+module.exports = { login, dropAll, changeMelonCounts, changePostCount, getUserDoc };

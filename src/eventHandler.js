@@ -16,6 +16,22 @@ async function postCounted(post, client) {
     }
 }
 
+//  On find old thread
+async function threadCounted(thread, client) {
+    try{
+        const originalMessage = await thread.fetchStarterMessage();
+        const author = originalMessage.author;
+        await mongoInterface.changePostCount(author, 1);
+        const melonReactions = await originalMessage.reactions.resolve('🍉').fetch();
+        if (melonReactions != null) {
+            await mongoInterface.changeMelonCounts(author, melonReactions.count, true);
+            const meloners = (await melonReactions.users.fetch()).keys();
+            for (const user of meloners) await mongoInterface.changeMelonCounts(await client.users.fetch(user), 1, false);
+        }
+    } catch (e) {
+    }
+}
+
 //  On post created
 async function postCreation(thread, client) {
     const threadOwner = await client.users.fetch(thread.ownerId);
@@ -60,4 +76,4 @@ async function melonRemoved(reaction, user, client) {
     logHandler.logEvent(`Melon was removed from ${author.username}'s post by ${user.username}`, logHandler.levels.REACTION);
 }
 
-module.exports = {  postCounted, postCreation, postDeletion, melonAdded, melonRemoved };
+module.exports = {  postCounted, threadCounted, postCreation, postDeletion, melonAdded, melonRemoved };

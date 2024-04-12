@@ -4,20 +4,32 @@ const eventHandler = require("./eventHandler.js");
 const mongoInterface = require("./mongoInterface.js");
 
 async function countAllFresh(client) {
-    logHandler.logEvent("Beginning a full recount.", logHandler.levels.COUNTER);
+    logHandler.logEvent(`Beginning a full recount.\nBeginning old gallery recount.`, logHandler.levels.COUNTER);
     await mongoInterface.dropAll("Users");
-    //const oldResults = await countOldGallery(client);
+    const oldResults = await countOldGallery(client);
+    logHandler.logEvent(`Full old gallery recount complete. Found a total of ${oldResults.i} posts.\nBeginning new gallery recount.`, logHandler.levels.COUNTER);
     const newResults = await countNewGallery(client);
-    //logHandler.logEvent(`Full recount complete. Found a total of ${oldResults.i} posts in ${oldResults.messageCount} messages.`, logHandler.levels.COUNTER);
+    logHandler.logEvent(`Full new gallery recount complete. Found a total of ${newResults.postCount} posts.`, logHandler.levels.COUNTER);
 }
 
 //	--------    COUNT THE NEW GALLERY    --------
 
 async function countNewGallery(client) {
     const galleryForum = (await (await client.guilds.fetch(guildID)).channels.fetch(galleryChannelID));
-    const options = { "limit":100, "cache":true};
-    const threads = (await galleryForum.threads.fetch(options)).threads;
-    console.log(threads.size);
+    let last_id;
+    let totalCount = 0;
+    let threads = (await galleryForum.threads.fetch()).threads;
+    totalCount += threads.size;
+    while (true) {
+        const options = { "limit":50 };
+        if (last_id) options.before = last_id;
+        threads = (await galleryForum.threads.fetchArchived(options)).threads;
+        await threads.forEach(async thread => await eventHandler.threadCounted(thread,client));
+        last_id = threads.last().id;
+        totalCount += threads.size;
+        if (threads.size != 50) break;
+    }
+    return {"postCount": totalCount};
 }
 
 //	--------    COUNT THE OLD GALLERY    --------
@@ -54,9 +66,7 @@ async function addMessages(channel, counts, client, options = {}) {
 			posts.push(x);
 			counts.i += 1;
 		}
-		if (counts.messageCount % 100 === 0) logHandler.logEvent(`Elapsed time: ${(Date.now()-counts.startTime)/1000}. ${counts.messageCount} messages read. ${counts.i} posts found.`, logHandler.levels.COUNTER);
-  	}
-	//logHandler.logEvent(`Found ${posts.length} posts.`, logHandler.levels.COUNTER);
+    }
 	posts.forEach(x => eventHandler.postCounted(x,client));
 	return counts;
 }
