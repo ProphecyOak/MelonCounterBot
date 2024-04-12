@@ -1,7 +1,8 @@
 const logLevels = [
     "STATUS", //for bot status updates
     "POST", //for post log
-    "REACTION" //for melon log
+    "REACTION", //for melon log
+    "COUNTER" //for gallery counter
 ]
 
 const levels = {}

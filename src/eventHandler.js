@@ -4,6 +4,18 @@ const logHandler = require("./logHandler.js");
 
 //	--------    POST CHANGES    --------
 
+//  On find old post
+async function postCounted(post, client) {
+    const author = post.author;
+    await mongoInterface.changePostCount(author, 1);
+    const melonReactions = post.reactions.resolve('🍉');
+    if (melonReactions != null) {
+        await mongoInterface.changeMelonCounts(author, melonReactions.count, true);
+        const meloners = melonReactions.users.cache.keys();
+        for (const user of meloners) await mongoInterface.changeMelonCounts(await client.users.fetch(user), 1, false);
+    }
+}
+
 //  On post created
 async function postCreation(thread, client) {
     const threadOwner = await client.users.fetch(thread.ownerId);
@@ -48,4 +60,4 @@ async function melonRemoved(reaction, user, client) {
     logHandler.logEvent(`Melon was removed from ${author.username}'s post by ${user.username}`, logHandler.levels.REACTION);
 }
 
-module.exports = {  postCreation, postDeletion, melonAdded, melonRemoved };
+module.exports = {  postCounted, postCreation, postDeletion, melonAdded, melonRemoved };

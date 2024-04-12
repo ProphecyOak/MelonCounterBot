@@ -7,6 +7,7 @@ const { token, galleryChannelID, publicKey } = require('../config.json');
 const eventHandler = require("./eventHandler.js");
 const mongoInterface = require("./mongoInterface.js");
 const logHandler = require("./logHandler.js");
+const oldCounter = require("./oldCounter.js");
 
 let startTime;
 
@@ -86,10 +87,10 @@ client.on(Events.InteractionCreate, async interaction => {
 //	--------    LOGIN THE CLIENT    --------
 
 client.once(Events.ClientReady, async () => {
-	//Initialization steps
+	await mongoInterface.login();
+	await oldCounter.countAllFresh(client);
+	logHandler.logEvent("Ready!", logHandler.levels.STATUS);
 });
 
 logHandler.logEvent("Booting Up...", logHandler.levels.STATUS);
 client.login(token);
-mongoInterface.login();
-logHandler.logEvent("Ready!", logHandler.levels.STATUS);

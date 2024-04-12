@@ -13,9 +13,13 @@ async function login() {
     await client.db("MelonCounting").command({ ping: 1 });
   } catch {
     throw("Failed to connect to MongoDB");
-  }
+  } 
 }
 const db = client.db("MelonCounting");
+
+async function dropAll(collection) {
+    db.collection(collection).deleteMany({});
+}
 
 //	--------    USER CHANGES    --------
 
@@ -54,4 +58,4 @@ async function changePostCount(user, amnt) {
     });
 }
 
-module.exports = { login, changeMelonCounts, changePostCount };
+module.exports = { login, dropAll, changeMelonCounts, changePostCount };
