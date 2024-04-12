@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js",
+    "deployCommands": "node src/deploy-commands.js"
   },
   "repository": {
     "type": "git",
@@ -18,7 +20,7 @@
   },
   "homepage": "https://github.com/ProphecyOak/MelonCounterBot#readme",
   "dependencies": {
-    "discord.js": "^14.6.0",
-    "mongodb": "^4.13.0"
+    "discord.js": "^14.14.1",
+    "mongodb": "^4.17.2"
   }
 }
