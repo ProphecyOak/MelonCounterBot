@@ -1,20 +1,24 @@
-//IMPORTS AND DEFAULTS
+//	--------    IMPORTS AND DEFAULTS    --------
 const fs = require('fs');
 const path = require('path');
 const { Client, Collection, Events, GatewayIntentBits, Partials } = require('discord.js');
 const { token, galleryChannelID, publicKey } = require('../config.json');
 
 const eventHandler = require("./eventHandler.js");
+const mongoInterface = require("./mongoInterface.js");
+const logHandler = require("./logHandler.js");
 
 let startTime;
 
-//CREATE DISCORD CLIENT
+//	--------    CREATE DISCORD CLIENT    --------
+
 const client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions],
-	partials: [Partials.Message, Partials.Channel, Partials.Reaction],
+	partials: [Partials.Message, Partials.Channel, Partials.Reaction, Partials.User],
 });
 
-//FETCHING CLIENT COMMANDS
+//	--------    FETCH CLIENT COMMANDS    --------
+
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
@@ -30,32 +34,41 @@ for (const file of commandFiles) {
 	}
 }
 
-//EVENT HANDLING
-client.once(Events.ClientReady, async () => {
-	startTime = Date.now();
-	console.log("Booting Up...")
-	// console.log(await dataEditTools.getYoungTime());
-	// if (await dataEditTools.getYoungTime() !== undefined) {await counterTools.checkYoungData(client);}
-	// else {await counterTools.countAllMelons(client);}
-	// console.log(`${(Date.now()-startTime)/1000} seconds elapsed.`);
-	console.log('Ready!');
-});
+//	--------    EVENT HANDLING    --------
 
-//	ON CREATE FORUM POST
+//	Forum post created
 client.on(Events.ThreadCreate, async thread => {
+	// console.log("Event: Thread Added");
 	if (thread.parentId === galleryChannelID) {
-		await eventHandler.threadCreation(thread, client);
+		await eventHandler.postCreation(thread, client);
 	}
 });
 
-//	ON DELETE FORUM POST
+//	Forum post deleted
 client.on(Events.ThreadDelete, async thread => {
+	// console.log("Event: Thread Removed");
 	if (thread.parentId === galleryChannelID) {
-		await eventHandler.threadDeletion(thread, client);
+		await eventHandler.postDeletion(thread, client);
 	}
 });
 
-// SLASH COMMAND
+//	Melon added to post
+client.on(Events.MessageReactionAdd, async (reaction, user) => {
+	// console.log("Event: Reaction Added");
+	if (reaction.emoji.name === '🍉') {
+		await eventHandler.melonAdded(reaction, user, client);
+	}
+});
+
+//	Melon removed from post
+client.on(Events.MessageReactionRemove, async (reaction, user) => {
+	// console.log("Event: Reaction Removed");
+	if (reaction.emoji.name === '🍉') {
+		await eventHandler.melonRemoved(reaction, user, client);
+	}
+});
+
+//	Slash command used
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 	const command = interaction.client.commands.get(interaction.commandName);
@@ -70,26 +83,13 @@ client.on(Events.InteractionCreate, async interaction => {
 	}
 });
 
+//	--------    LOGIN THE CLIENT    --------
 
-// OLD EVENT HANDLING ----- REMOVED FOR REMAKE TO USE THE FORUM CHANNEL
-// client.on(Events.MessageReactionAdd, (reaction, user) => {
-//   counterTools.reactChange(reaction, 1, user, galleryChannelID);
-// });
-// client.on(Events.MessageReactionRemove, (reaction, user) => {
-//   counterTools.reactChange(reaction, -1, user, galleryChannelID);
-// });
-// client.on(Events.MessageCreate, async message => {
-// 	if (message.channelId !== galleryChannelID) {return;}
-// 	counterTools.checkIfRebuild(client); //Check on message if its time to build new YoungData
-// 	message = await message.fetch();
-// 	if (await dataEditTools.checkMessageHasImg(message)) {await dataEditTools.addPost(message);}
-// });
-// client.on(Events.MessageDelete, async message => {
-// 	if (await dataEditTools.checkMessageHasImg(message, false)) {
-// 		await dataEditTools.removePost(message);
-// 	}
-// });
+client.once(Events.ClientReady, async () => {
+	//Initialization steps
+});
 
-
-//LOGIN THE CLIENT
+logHandler.logEvent("Booting Up...", logHandler.levels.STATUS);
 client.login(token);
+mongoInterface.login();
+logHandler.logEvent("Ready!", logHandler.levels.STATUS);

@@ -21,6 +21,6 @@
   "homepage": "https://github.com/ProphecyOak/MelonCounterBot#readme",
   "dependencies": {
     "discord.js": "^14.14.1",
-    "mongodb": "^4.13.0"
+    "mongodb": "^4.17.2"
   }
 }
