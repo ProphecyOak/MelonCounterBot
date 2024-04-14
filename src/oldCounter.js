@@ -6,6 +6,7 @@ const mongoInterface = require("./mongoInterface.js");
 async function countAllFresh(client) {
     logHandler.logEvent(`Beginning a full recount.\nBeginning old gallery recount.`, logHandler.levels.COUNTER);
     await mongoInterface.dropAll("Users");
+    await mongoInterface.dropAll("Posts");
     const oldResults = await countOldGallery(client);
     logHandler.logEvent(`Full old gallery recount complete. Found a total of ${oldResults.i} posts.\nBeginning new gallery recount.`, logHandler.levels.COUNTER);
     const newResults = await countNewGallery(client);
@@ -67,7 +68,7 @@ async function addMessages(channel, counts, client, options = {}) {
 			counts.i += 1;
 		}
     }
-	posts.forEach(x => eventHandler.postCounted(x,client));
+	await posts.forEach(async x => await eventHandler.postCounted(x,client));
 	return counts;
 }
 

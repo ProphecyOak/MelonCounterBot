@@ -8,11 +8,13 @@ const logHandler = require("./logHandler.js");
 async function postCounted(post, client) {
     const author = post.author;
     await mongoInterface.changePostCount(author, 1);
+    await mongoInterface.addPost(post, author);
     const melonReactions = post.reactions.resolve('🍉');
     if (melonReactions != null) {
         await mongoInterface.changeMelonCounts(author, melonReactions.count, true);
-        const meloners = melonReactions.users.cache.keys();
-        for (const user of meloners) await mongoInterface.changeMelonCounts(await client.users.fetch(user), 1, false);
+        const meloners = await melonReactions.users.fetch();
+        if (melonReactions.count !== meloners.size) console.log(`${post}`);
+        for (const user of meloners.keys()) await mongoInterface.changeMelonCounts(await client.users.fetch(user), 1, false);
     }
 }
 
@@ -22,6 +24,7 @@ async function threadCounted(thread, client) {
         const originalMessage = await thread.fetchStarterMessage();
         const author = originalMessage.author;
         await mongoInterface.changePostCount(author, 1);
+        await mongoInterface.addPost(thread, author);
         const melonReactions = await originalMessage.reactions.resolve('🍉').fetch();
         if (melonReactions != null) {
             await mongoInterface.changeMelonCounts(author, melonReactions.count, true);
@@ -36,6 +39,7 @@ async function threadCounted(thread, client) {
 async function postCreation(thread, client) {
     const threadOwner = await client.users.fetch(thread.ownerId);
     await mongoInterface.changePostCount(threadOwner, 1);
+    await mongoInterface.addPost(client, thread);
     logHandler.logEvent(`Post created by ${threadOwner.username}.`, logHandler.levels.POST);
 }
 
@@ -49,6 +53,7 @@ async function postDeletion(thread, client) {
         for (const user of meloners) await mongoInterface.changeMelonCounts(await client.users.fetch(user), -1, false);
     }
     await mongoInterface.changePostCount(threadOwner, -1);
+    await mongoInterface.removePost(thread);
     logHandler.logEvent(`${threadOwner.username}'s post was deleted.`, logHandler.levels.POST);
 }
 

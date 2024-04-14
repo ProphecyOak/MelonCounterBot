@@ -1,7 +1,6 @@
 const { mongoPassword } = require('../config.json');
 const { MongoClient, ServerApiVersion } = require('mongodb');
-
-//	--------    MELON CHANGES    --------
+const logHandler = require('./logHandler');
 
 const uri = `mongodb+srv://melonBot:${mongoPassword}@melondata.jltseqr.mongodb.net/?retryWrites=true&w=majority&appName=MelonData`;
 const client = new MongoClient(uri, {
@@ -36,7 +35,7 @@ async function changeMelonCounts(user, amnt, received) {
             "melons_given": received ? 0 : amnt
         }
     }
-    const result = collection.updateOne(query, userDoc, {upsert: true}).catch(error => {
+    const result = await collection.updateOne(query, userDoc, {upsert: true}).catch(error => {
         console.error("Error updating user's melons:\n%S",error);
     });
 }
@@ -53,9 +52,31 @@ async function changePostCount(user, amnt) {
             "post_count": amnt
         }
     }
-    const result = collection.updateOne(query, userDoc, {upsert: true}).catch(error => {
+    const result = await collection.updateOne(query, userDoc, {upsert: true}).catch(error => {
         console.error("Error updating user's post count:\n%S",error);
     });
+}
+
+//	--------    POST CHANGES    --------
+
+//  Add post to the posts collection
+async function addPost(post, postAuthor) {
+    const collection = db.collection("Posts");
+    const postID = post.id;
+    const postDate = post.createdAt;
+    await collection.insertOne({
+        "_id":postID,
+        "creation-time": postDate,
+        "author": postAuthor.username,
+        "authorID": postAuthor.id
+    });
+}
+
+//  Remove post to the posts collection
+async function removePost(post) {
+    const collection = db.collection("Posts");
+    const postID = post.id;
+    await collection.deleteOne({$eq: {"_id":postID}});
 }
 
 //	--------    USER VIEWING    --------
@@ -66,4 +87,12 @@ async function getUserDoc(user) {
     return result[0];
 }
 
-module.exports = { login, dropAll, changeMelonCounts, changePostCount, getUserDoc };
+module.exports = {
+    login,
+    dropAll,
+    changeMelonCounts,
+    changePostCount,
+    addPost,
+    removePost,
+    getUserDoc
+};
